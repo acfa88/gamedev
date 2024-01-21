@@ -1,0 +1,430 @@
+//===== Scipt name ===========================================
+//= Enchant NPC Artesa Magica de Hugin
+//===== Data: ===========================================
+//= 2016
+//===== Descrição: ===========================================
+//= Adiciona um encantamento nos slots não utilizados das botas temporais de atributos
+//===== Changelogs: ==========================================
+//= 1.0 First version. by [acfa88]
+//=     Essa é a primeira versão e necessita de refatoração.  
+//===== Comentários: =========================================
+//= Há muitos if aninhados dificultando a legibilidade. Ao menos, está funcionando perfeitamente no servidor em produção.
+//= Código legado dos anos 2000, não é programação estruturada; é programação procedural ou não estruturada, 
+//= por isso não consegui criar funções; é necessário usar "goto" para organizar os if aninhados. 
+//============================================================
+glast_01,212,273,4	script	Artesa Magica de Hugin	66,{
+	disable_items;
+	if (!checkweight(1201,1)) {
+		mes "You have too many types of belongings. Let's try again after reducing the types of items.";
+		close;
+	}
+    if (MaxWeight - Weight < 1000) {
+		mes "Sua mochila esta muito cheia. Reduza seu peso e volte novamente.";
+        close;
+    }
+    mes "[Artesa Magica de Hugin]";
+    mes "Entao voce veio encantar suas botas temporais. Esteja ciente que botas com slots nao podem ser encantandas, e esse upgrade so e possivel para as botas que voce esta equipado.";
+    next;
+    if (select("Como o encantamento funciona?","Me de o efeito para minha bota temporal") == 1) {
+		mes "[Artesa Magica de Hugin]";
+		mes "Voce pode continuar obtendo ^0000FFCoagulated Spell^000000 atraves varias viagens suas a instancia.";
+		next;
+		mes "[Artesa Magica de Hugin]";
+		mes "Eu posso encantar seu item Temporal Boots dependendo do item. ^0000FFNao botas tipo normais^000000. Somente possivel para essas 6 versoes de botas.";
+		next;
+		mes "[Artesa Magica de Hugin]";
+		mes "Mas, uma vez que voce colocou slot no item, voce nao pode encanta-lo. Certifique-se de saber disso.";
+		next;
+		mes "[Artesa Magica de Hugin]";
+		mes "Eu nao dou efeito aleatoriamente. Voce pode escolher o efeito que deseja do item.";
+		next;
+		mes "[Artesa Magica de Hugin]";
+		mes "Claro que apenas para o slot numero 4th. Voce pode ter um efeito inicial, e entao o efeito fica mais forte.";
+		next;
+		mes "[Artesa Magica de Hugin]";
+		mes "Para ter mais upgrade ate a opcao final, sera necessario coletar muito mais items Coagulated Spell. Nao se esqueca disso.";
+		next;
+		mes "[Artesa Magica de Hugin]";
+		mes "Quando o 4th slot completar a melhor opcao, voce tera um efeito bonus aleatorio do 3rd slot. Com.. um certo pagamento~";
+		next;
+		mes "[Artesa Magica de Hugin]";
+		mes "Alem disso, voce nao perde o item mesmo que encantamento falhe, nos tambem garatimos que continuara com cartas e o nivel de refinamento. Mas nos nao podemos encantar botas com slot.";
+		next;
+		mes "[Artesa Magica de Hugin]";
+		mes "Phew...";
+		mes "De qualquer maneira, isso e toda a informacao basica de encantamentos. Agora voce deveria ver por voce mesmo.";
+		close;
+    }
+    set .@part,EQI_SHOES;
+    if (!getequipisequiped(.@part)) {
+        mes "[Artesa Magica de Hugin]";
+        mes "Voce esta com bota equipada?";
+        close;
+    }
+    set .@equip_id,getequipid(.@part);
+    set .@equip_name$,getequipname(.@part);
+    set .@card3,getequipcardid(.@part,3);
+    setarray .@enchant1st[0],4808,4832,4814,4741,4869,4752; //Fighting_Spirit4,Expert_Archer1,Spell2,Vitality2,DelayafterAttack1Lv,Luck3
+    setarray .@enchant2nd[0],4820,4833,4813,4742,4872,4753; //Fighting_Spirit5,Expert_Archer2,Spell3,Vitality3,DelayafterAttack2Lv,Luck4
+    setarray .@enchant3rd[0],4821,4834,4812,4861,4873,4754; //Fighting_Spirit6,Expert_Archer3,Spell4,MHP1,DelayafterAttack3Lv,Luck5
+    setarray .@enchant4th[0],4822,4835,4826,4862,4881,4755; //Fighting_Spirit7,Expert_Archer4,Spell5,MHP2,DelayafterAttack4Lv,Luck6
+    setarray .@enchant_cost[0],1,4,15,30,10;
+    switch (.@equip_id) {
+        case 22000: //Temporal_Str_Boots
+        case 22001: //Temporal_Int_Boots
+        case 22002: //Temporal_Agi_Boots
+        case 22003: //Temporal_Vit_Boots
+        case 22004: //Temporal_Dex_Boots
+        case 22005: //Temporal_Luk_Boots
+        if (!.@card3) { //4th slot 1st try enchanting
+            set .@cost,.@enchant_cost[0];
+            set .@number,1;
+            mes "[Artesa Magica de Hugin]";
+            mes "Gostaria de encantar ^0000FF"+.@equip_name$+"^000000?";
+            mes "Para encantar a "+.@number+"st, voce ^0000FF"+.@cost+"^000000 Coagulated Spell items.";
+            next;
+            set .@select,select("Quit","Fighting Spirit","Archery","Spell","Vitality","Attack Speed","Lucky");
+            switch (.@select) {
+            case 1:
+                mes "[Artesa Magica de Hugin]";
+                mes "Ok, volte quando voce estiver pronto.";
+                close;
+            case 2:
+                set .@enchant,.@enchant1st[.@select-2];
+                break;
+            case 3:
+				set .@enchant,.@enchant1st[.@select-2];
+				break;
+            case 4:
+                set .@enchant,.@enchant1st[.@select-2];
+                break;
+            case 5:
+                set .@enchant,.@enchant1st[.@select-2];
+                break;
+            case 6:
+                set .@enchant,.@enchant1st[.@select-2];
+                break;
+            case 7:
+                set .@enchant,.@enchant1st[.@select-2];
+                break;
+            }
+        } else {
+            if (.@card3 == .@enchant1st[0] || .@card3 == .@enchant1st[1] || .@card3 == .@enchant1st[2] ||
+                .@card3 == .@enchant1st[3] || .@card3 == .@enchant1st[4] || .@card3 == .@enchant1st[5]) 
+			{
+                set .@cost,.@enchant_cost[1];
+                set .@number,2;
+            } else if (
+				.@card3 == .@enchant2nd[0] || .@card3 == .@enchant2nd[1] || .@card3 == .@enchant2nd[2] ||
+                .@card3 == .@enchant2nd[3] || .@card3 == .@enchant2nd[4] || .@card3 == .@enchant2nd[5]) 
+				{
+                set .@cost,.@enchant_cost[2];
+                set .@number,3;
+            } else if (
+				.@card3 == .@enchant3rd[0] || .@card3 == .@enchant3rd[1] || .@card3 == .@enchant3rd[2] ||
+                .@card3 == .@enchant3rd[3] || .@card3 == .@enchant3rd[4] || .@card3 == .@enchant3rd[5]) 
+			{
+                set .@cost,.@enchant_cost[3];
+                set .@number,4;
+            } else if (.@card3 == .@enchant4th[0] || .@card3 == .@enchant4th[1] || .@card3 == .@enchant4th[2] ||
+                        .@card3 == .@enchant4th[3] || .@card3 == .@enchant4th[4] || .@card3 == .@enchant4th[5]) {
+                                set .@card2,getequipcardid(.@part,2);
+                                set .@cost,.@enchant_cost[4];
+                                if (.@card2) {
+                                        mes "[Hugin's Magic Master]"; //Custom text
+                                        mes "Sua bota tem/atingiu a maxima opcao de encantamentos.";
+                                        mes "Por favor me traga uma nova se voce quer encantar novamente.";
+                                        close;
+                                }
+                                //3rd slot random enchanting
+                                switch (.@card3) {
+                                        case 4822: //Fighting_Spirit7
+                                        case 4835: //Expert_Archer4
+                                        case 4826: //Spell5
+                                        case 4862: //MHP2
+                                        case 4881: //DelayafterAttack4Lv
+                                        case 4755: //Luck6
+                                                set .@enchant,callfunc("F_Rand",4875,4876,4877,4878,4879,4880); //Bear's_Power,Runaway_Magic,Speed_Of_Light,Muscle_Fool,Hawkeye,Lucky_Day
+                                                mes "[Hugin's Magic Master]"; //Custom text
+                                                mes "Parace que voce ja completou o melhor upgrade no seu 4th slot.";
+                                                mes "Para eu dar-lhe a um efeito bonus aleatorio bonus no 3rd slot. E claro, com um certo pagamento...";
+                                                next;
+                                                mes "[Artesa Magica de Hugin]";
+                                                mes "Encantando ^0000FF"+.@equip_name$+"^000000's 3rd slot para obter um efeito aleatorio bonus. Requer ^0000FF"+.@cost+"^000000 Coagulated Spell items.";
+                                                next;
+                                                if (select("Quit","Fazer o Upgrade!") == 1) {
+                                                        mes "[Artesa Magica de Hugin]";
+                                                        mes "Ok, retorne quando voce estiver pronto.";
+                                                        close;
+                                                }
+                                                if (countitem(6608) < .@cost) {
+                                                        mes "[Artesa Magica de Hugin]";
+                                                        mes "Hmm, voce esta sem "+(.@cost - countitem(6608))+" Coagulated Spell. Volte com mais, e entao nos conversaremos mais sobre encatamentos.";
+                                                        close;
+                                                }
+                                                specialeffect2 EF_REPAIRWEAPON;
+                                                set .@equip_refine,getequiprefinerycnt(.@part);
+                                                delitem 6608,.@cost; //Coagulated_Spell
+                                                delequip .@part;
+                                                mes "[Artesa Magica de Hugin]";
+                                                mes "E isso! Esse pedra especial e sua agora.";
+                                                mes "Hahaha... Eu sou realmente o unico mestre nessas coisas.";
+                                                mes "Obrigado por acreditar em mim.";
+                                                getitem2 .@equip_id,1,1,.@equip_refine,0,0,0,.@enchant,.@card3;
+                                                close;
+                                }
+                        }
+                        //4th slot 2nd try enchanting
+                        if (.@card3 == .@enchant1st[0])
+                                set .@enchant,.@enchant2nd[0];
+                        else if (.@card3 == .@enchant1st[1])
+                                set .@enchant,.@enchant2nd[1];
+                        else if (.@card3 == .@enchant1st[2])
+                                set .@enchant,.@enchant2nd[2];
+                        else if (.@card3 == .@enchant1st[3])
+                                set .@enchant,.@enchant2nd[3];
+                        else if (.@card3 == .@enchant1st[4])
+                                set .@enchant,.@enchant2nd[4];
+                        else if (.@card3 == .@enchant1st[5])
+                                set .@enchant,.@enchant2nd[5];
+                        //4th slot 3rd try enchanting
+                        if (.@card3 == .@enchant2nd[0])
+                                set .@enchant,.@enchant3rd[0];
+                        else if (.@card3 == .@enchant2nd[1])
+                                set .@enchant,.@enchant3rd[1];
+                        else if (.@card3 == .@enchant2nd[2])
+                                set .@enchant,.@enchant3rd[2];
+                        else if (.@card3 == .@enchant2nd[3])
+                                set .@enchant,.@enchant3rd[3];
+                        else if (.@card3 == .@enchant2nd[4])
+                                set .@enchant,.@enchant3rd[4];
+                        else if (.@card3 == .@enchant2nd[5])
+                                set .@enchant,.@enchant3rd[5];
+                        //4th slot 4th try enchanting
+                        if (.@card3 == .@enchant3rd[0])
+                                set .@enchant,.@enchant4th[0];
+                        else if (.@card3 == .@enchant3rd[1])
+                                set .@enchant,.@enchant4th[1];
+                        else if (.@card3 == .@enchant3rd[2])
+                                set .@enchant,.@enchant4th[2];
+                        else if (.@card3 == .@enchant3rd[3])
+                                set .@enchant,.@enchant4th[3];
+                        else if (.@card3 == .@enchant3rd[4])
+                                set .@enchant,.@enchant4th[4];
+                        else if (.@card3 == .@enchant3rd[5])
+                                set .@enchant,.@enchant4th[5];
+                        mes "[Hugin's Magic Master]";
+                        mes "Enchanting ^0000FF"+.@equip_name$+"^000000's 4th slot as ^0000FF"+.@number+"^000000 level effect. Requires ^0000FF"+.@cost+"^000000 Coagulated Spell items.";
+                        next;
+                        if (select("Sair","Fazer Upgrade!") == 1) {
+                                mes "[Artesa Magica de Hugin]";
+                                mes "Ok, volte mais tarde quando estiver preparado.";
+                                close;
+                        }
+                        if (countitem(6608) < .@cost) {
+                                mes "[Artesa Magica de Hugin]";
+                                mes "Hmm, voce esta sem "+(.@cost - countitem(6608))+" Coagulated Spell items. Volte com mais, e entao nos conversaremos mais sobre encantamentos.";
+                                close;
+                        }
+                }
+                break;
+        default:
+                mes "[Artesa Magica de Hugin]";
+                mes "Esse nao e o item certo para esse encantamento.";
+                mes "Lembre-se, apenas 6 tipos de botas temporais estao disponiveis para encantamentos.";
+                close;
+        }
+        specialeffect2 EF_REPAIRWEAPON;
+        set .@equip_refine,getequiprefinerycnt(.@part);
+        delitem 6608,.@cost; //Coagulated_Spell
+        delequip .@part;
+        mes "[Artesa Magica de Hugin]";
+        mes "Tentando o encanmento numero ^630000"+.@number+"^000000.";
+        getitem2 .@equip_id,1,1,.@equip_refine,0,0,0,0,.@enchant;
+        close;
+}
+
+//===== Scipt name ===========================================
+//= NPC Ferreira de Hugin
+//===== Descrição: ===========================================
+//= Adiciona um slot na bota temporal de atributos com uma 
+//= chance de 50% de perder o item.
+//============================================================
+
+glast_01,208,273,4	script	Ferreira de Hugin	726,{
+        disable_items;
+		if (!checkweight(1201,1)) {
+			mes "You have too many types of belongings. Let's try again after reducing the types of items.";
+			close;
+		}
+        if (MaxWeight - Weight < 1000) {
+                mes "Sua mochila esta muito cheia. Esvazie e volte novamente.";
+                close;
+        }
+        mes "[Ferreira de Hugin]";
+        mes "Mestre Magico Hugin dira sempre que encantamento e melhor. Mas, eu penso diferente.";
+        next;
+        mes "[Ferreira de Hugin]";
+        mes "Eu acho que colocar um slot nas botas seria melhor. Mesmo com um risco 50 porcento de perder o item.";
+        next;
+        mes "[Ferreira de Hugin]";
+        mes "Traga-me ^0000FF5 Temporal Crystals^000000, e eu irei tentar por um slot em suas Temporal Boots. Mas, e possivel que ^FF0000falhe e quebre o item^000000. Esta entendido?";
+        next;
+        if (select("Sair","Quero arriscar e tentar adicionar um slot") == 1) {
+                mes "[Ferreira de Hugin]";
+                mes "Certo, volte quando voce quiser.";
+                close;
+        }
+        set .@part,EQI_SHOES;
+        if (!getequipisequiped(.@part)) {
+                mes "[Ferreira de Hugin]";
+                mes "Voce esta com item equipado?";
+                close;
+        }
+        set .@equip_id,getequipid(.@part);
+        switch (.@equip_id) {
+        case 22000: //Temporal_Str_Boots
+        case 22001: //Temporal_Int_Boots
+        case 22002: //Temporal_Agi_Boots
+        case 22003: //Temporal_Vit_Boots
+        case 22004: //Temporal_Dex_Boots
+        case 22005: //Temporal_Luk_Boots
+                mes "[Ferreira de Hugin]";
+                mes "Todos ^FF0000 encantos e refinos serao perdidos em caso de falha.^000000";
+                mes "Ainda quer arriscar?";
+                next;
+                if (select("Sair","Eu estou bem, vamos nessa!") == 1) {
+                        mes "[Ferreira de Hugin]";
+                        mes "Certo, voce qualquer hora quando quiser.";
+                        close;
+                }
+                mes "[Ferreira de Hugin]";
+                mes "De novo, ^FF0000Mestre magico nao pode encantar qualquer item com um slot.^000000";
+                mes "Ainda quer continuar?";
+                next;
+                if (select("Sair","Eu entendi. Tentar o slot.") == 1) {
+                        mes "[Ferreira de Hugin]";
+                        mes "Certo, voce qualquer hora quando quiser.";
+                        close;
+                }
+                if (countitem(6607) < 5) {
+                        mes "[Ferreira de Hugin]";
+                        mes "Voce deve trazer ^0000FF5 Temporal Crystal items^000000. Nao e de graca voce sabe...";
+                        close;
+                }
+                set .@random,rand(1,100);
+                if (.@random <= 50) { //Custom rates
+                        mes "[Ferreira de Hugin]";
+                        mes "Arrggg, nos falhamos. Melhor sorte na proxima vez.";
+                        specialeffect2 EF_PHARMACY_FAIL;
+                        delitem 6607,5; //Temporal_Crystal
+                        delequip .@part;
+                        close;
+                }
+                mes "[Ferreira de Hugin]"; //Custom text
+                mes "Yuhuu~ nos conseguimos. Aqui esta...";
+                mes "Um slot foi adicionado a sua Temporal Boots.";
+                mes "Obrigado por acreditar em mim.";
+                specialeffect2 EF_PHARMACY_OK;
+                delitem 6607,5; //Temporal_Crystal
+                delequip .@part;
+                if (.@equip_id == 22000) {
+                        getitem 22006,1; //Temporal_Str_Boots_
+                } else if (.@equip_id == 22001) {
+                        getitem 22009,1; //Temporal_Int_Boots_
+                } else if (.@equip_id == 22002) {
+                        getitem 22010,1; //Temporal_Agi_Boots_
+                } else if (.@equip_id == 22003) {
+                        getitem 22007,1; //Temporal_Vit_Boots_
+                } else if (.@equip_id == 22004) {
+                        getitem 22008,1; //Temporal_Dex_Boots_
+                } else if (.@equip_id == 22005) {
+                        getitem 22011,1; //Temporal_Luk_Boots_
+                }
+                close;
+        default:
+                mes "[Ferreira de Hugin]";
+                mes "Nao e esse item! Nos precisamos do item ^0000FFAdvanced Temporal Boots^000000! O item ^0000FF deve ser sem slot^000000!";
+                close;
+        }
+}
+
+//===== Scipt name ===========================================
+//= NPC Governanta de Hugin
+//===== Descrição: ===========================================
+//= Troca 1 cristal temporal por uma bota temporal ou
+//= troca 5 cristais temporais e uma bota temporal por uma bota temporal de atributo.
+//============================================================
+
+glast_01,192,273,6	script	Governanta de Hugin	979,{
+	disable_items;	
+	mes "[Governanta de Hugin]";	
+    mes "Bem-vindo ... Bem Vindo !";
+	next;
+	mes "[Governanta de Hugin]";
+	mes "Comigo voce pode trocar ^0000FF Temporal Crystal items^000000 e ^0000FF Coagulated Spell^000000 ";
+	next;
+	mes "[Governanta de Hugin]";
+	mes "Para conseguir 1 Botas Temporais, me entregue 1 Temporal Crystal";
+	mes "Para conseguir a Temporal Boots de atributo, equipe as Temporais Boots e traga 5 Temporal Crystal";
+	next;
+	if (!checkweight(1201,1)) {
+		mes "You have too many types of belongings. Let's try again after reducing the types of items.";
+		close;
+	}
+	if (MaxWeight - Weight < 1000) {
+		mes "[Governanta de Hugin]";	
+		mes "Sua mochila esta muito cheia. Esvazie e volte novamente.";
+		close;
+    }	
+	if (select("Trocar botas temporais simples","botas temporais de atributos") == 1) {
+		if (countitem(6607) < 1) {			
+			mes "[Governanta de Hugin]";
+			mes "Voce deve me trazer ^0000FF1 Temporal Crystal items^000000. As botas nao sao de graca";
+			close;
+        }				
+		mes "[Governanta de Hugin]";
+		mes "Aqui esta o seu item.";
+		getitem 2499,1;
+		delitem 6607,1;
+		close;
+    }	
+	mes "[Governanta de Hugin]";
+    mes "Voce quer trocar suas Temporais Boots por uma de atributo?.";
+	next;
+	if (select("Sair","Quero trocar por uma bota de atributos") == 1) {		 
+		 mes "[Governanta de Hugin]";
+		 mes "Volte quando estiver pronto.";		 
+       } 
+	if (countitem(6607) < 5) {
+		mes "[Governanta de Hugin]";
+		mes "Voce deve me trazer ^0000FF5 Temporal Crystal items^000000. As botas nao sao de graca";
+        close;
+	}
+	set .@part,EQI_SHOES;
+	set .@equip_id,getequipid(.@part);
+	
+	if (!getequipisequiped(.@part)) {
+		mes "[Governanta de Hugin]";
+        mes "Voce esta com a Bota equipada?";
+        close;
+	}
+    switch (.@equip_id) {
+	case 2499:
+		mes "[Governanta de Hugin]";	
+		mes "Por favor, escolha o atributo da bota";
+		next;
+		.@number = select("Forca","Inteligencia","Agilidade","Vitalidade","Destreza","Sorte");
+		.@number = .@number -1;		
+		setarray .@temporalbootsAtr[0],22000,22001,22002,22003,22004,22005; //Temporal_Str_Boots,Temporal_Int_Boots,Temporal_Agi_Boots,Temporal_Vit_Boots,Temporal_Dex_Boots,Temporal_Luk_Boots			
+		getitem .@temporalbootsAtr[.@number], 1;
+		delequip .@part;
+		delitem 6607,5;
+		mes "Aqui esta sua bota";
+		close;
+	default:
+		mes "[Governanta de Hugin]";
+		mes "O item nao e esse! ";
+        close;
+    }   
+}

@@ -1,0 +1,292 @@
+//===== Scipt name ===========================================
+//= Enchant and Socket NPC Fallen Wings
+//===== Data: ===========================================
+//= 2016
+//===== Descrição: ===========================================
+//= Adiciona um tipo basico de uma lista de possiveis encantamentos  
+//= para adicionar nos 4 slots livres do item Fallen Wings 
+//= dependendo do nivel de refino do item
+//===== Changelogs: ==========================================
+//= 1.0 First version. by [acfa88]
+//=     Essa é a primeira versão e necessita de refatoração.  
+//===== Comentarios: =========================================
+//= Fiz este código para rodar dentro de um servidor em produção de jogo online dos anos 2000.
+//= Este código legado não é programação estruturada; é programação procedural ou não estruturada.
+//= Por esse motivo não consegui criar funções para organizar o excesso de "ou" dentro dos if.
+//= Que verifica se já há um slot de encantamento no item equipado dentro de uma lista de possibilidades.
+//= Recomendo criar uma lista apontando com "goto" que verificar o booleano e também atribuir aquelas possibilidades.
+//= Não está bonito, não sabia mexer com código legado; o programa tem muitos métodos proprietários desconhecidos,
+//= talvez tenha uma metodo que simplemente verifica se já tem um encantamento no slot do item equipado, ao inves de verificar item por item.
+//= tem que consultar o manual; (que não estava disponivel na epoca), esta feio, porém, ao menos, está funcionando perfeitamente. =)
+//============================================================
+
+geffen,136,55,4	script	Valquiria Obscura	403,{
+        disable_items;
+		if (!checkweight(1201,1)) {
+				mes "You have too many types of belongings. Let's try again after reducing the types of items.";
+				close;
+		}
+        if (MaxWeight - Weight < 1000) {
+                mes "Sua mochila esta muito cheia. Reduza seu peso e volte novamente.";
+                close;
+        }
+        mes "[Valquiria Obscura]";
+        mes "Voce veio encantar suas Fallen Wings? Cada encantamento e gratuito, recebendo no maximo 3 pedras de encanto por vez, e esse upgrade so e possivel para as asas Fallen que voce esta equipado.";
+        next;
+        if (select("Como o encantamento funciona?","Me de o efeito para minha Fallen Wing") == 1) {
+                mes "[Valquiria Obscura]";
+                mes "Voce pode escolher o tipo de encanto, mas nao pode escolher a pedra especificamente.";
+                next;
+                mes "[Valquiria Obscura]";
+                mes "O refinamento do item define a quantidade de pedras que a asa pode receber";
+                next;
+                mes "[Valquiria Obscura]";
+                mes "+0 a +6 = 1 pedra de encanto";
+                next;
+                mes "[Valquiria Obscura]";
+                mes "+7 ou +8 = 2 pedras de encanto";
+                next;
+                mes "[Valquiria Obscura]";
+                mes "+9 em diante = 3 pedras de encanto";
+                next;
+                mes "[Valquiria Obscura]";
+                mes "No refino +9, ha uma chance adicional de receber um encantamento em nivel maior.";
+                next;
+                mes "[Valquiria Obscura]";
+                mes "Os encantamentos nao podem ser resetados.";
+                next;
+                mes "[Valquiria Obscura]";
+                mes "Nao existem chances de perder o equipamento em caso de falha.";
+                next;
+                mes "[Valquiria Obscura]";                
+                mes "Essa e toda a informacao basica de encantamentos. Agora voce deveria ver por voce mesmo.";
+                close;
+        }
+        set .@part,EQI_GARMENT;
+        if (!getequipisequiped(.@part)) {
+                mes "[Valquiria Obscura]";
+                mes "Voce esta com a capa Fallen Wings equipada?";
+                close;
+        }
+		
+        set .@equip_id,getequipid(.@part);
+        set .@equip_name$,getequipname(.@part);
+        set .@card3,getequipcardid(.@part,3);
+	    set .@card2,getequipcardid(.@part,2);	    
+	    set .@card1,getequipcardid(.@part,1);
+        set .@card0,getequipcardid(.@part,0);
+		set .@equip_refine,getequiprefinerycnt(.@part);
+		
+	    setarray .@enchant1[0],4809,4808,4820,4821; //Fighting_Spirit3, Fighting_Spirit4,Fighting_Spirit5,Fighting_Spirit6
+		setarray .@enchant2[0],4812,4826,4827,4828; // Spell4,Spell5,Spell6,Spell7
+		setarray .@enchant3[0],4832,4833,4834,4835; //Expert_Archer1,Expert_Archer2,Expert_Archer3,Expert_Archer4
+		setarray .@enchant4[0],4926,4939,4940,4941; //Critical,Critica2,Critica3,Critica4
+		setarray .@enchant5[0],4861,4862,4867,4868; //MHP1,MHP2,MHP3,MHP4
+		setarray .@enchant6[0],4870,4800,4871,4801; //SP25,SP50,SP75,SP100
+		setarray .@enchant7[0],4869,4872,4873,4807; //Attack_Delay_1,Attack_Delay_2,Attack_Delay_3,Atk_Speed1
+		setarray .@enchant8[0],4702,4703,4704,4853; //Strength3,Strength4,Strength5,S_Str
+		setarray .@enchant9[0],4732,4733,4734,4854; //Agility3,Agility4,Agility5,S_Agi
+		setarray .@enchant10[0],4742,4743,4744,4855; //Vitality3,Vitality4,Vitality5, S_Vital
+		setarray .@enchant11[0],4712,4713,4714,4856; //Inteligence3,Inteligence4,Inteligence5,S_Int
+		setarray .@enchant12[0],4722,4723,4724,4857; //Dexterity3,Dexterity4,Dexterity5, S_Dex
+		setarray .@enchant13[0],4752,4753,4754,4858; //Luck3,Luck4,Luck5, S_Luck
+		
+        switch (.@equip_id) {
+        case 2589: //Fallen_Angel_Wing
+			
+            mes "[Valquiria Obscura]";
+            mes "Gostaria de encantar ^0000FF"+.@equip_name$+"^000000? Por favor escolha o tipo de encamento.";	
+			next;		    
+            set .@select,select("Sair","Fisico","Magico","Alcance","Critico","HP","SP","Velocidade de Ataque","Forca","Agilidade","Vitalidade","Inteligencia","Destreza","Sorte");						
+			switch (.@select) {
+			case 1:
+				mes "[Valquiria Obscura]";
+				mes "Ok, volte quando voce estiver pronto.";
+			close;
+			case 2:
+				setarray .@enchant[0],.@enchant1[0];
+				setarray .@enchant[1],.@enchant1[1];
+				setarray .@enchant[2],.@enchant1[2];
+				setarray .@enchant[3],.@enchant1[3];				
+			break;
+			case 3:		
+				setarray .@enchant[0],.@enchant2[0];
+				setarray .@enchant[1],.@enchant2[1];
+				setarray .@enchant[2],.@enchant2[2];
+				setarray .@enchant[3],.@enchant2[3];
+			break;
+			case 4:
+				setarray .@enchant[0],.@enchant3[0];
+				setarray .@enchant[1],.@enchant3[1];
+				setarray .@enchant[2],.@enchant3[2];
+				setarray .@enchant[3],.@enchant3[3];
+			break;
+			case 5:
+				setarray .@enchant[0],.@enchant4[0];
+				setarray .@enchant[1],.@enchant4[1];
+				setarray .@enchant[2],.@enchant4[2];
+				setarray .@enchant[3],.@enchant4[3];
+			break;
+			case 6:
+				setarray .@enchant[0],.@enchant5[0];
+				setarray .@enchant[1],.@enchant5[1];
+				setarray .@enchant[2],.@enchant5[2];
+				setarray .@enchant[3],.@enchant5[3];
+			break;
+			case 7:
+				setarray .@enchant[0],.@enchant6[0];
+				setarray .@enchant[1],.@enchant6[1];
+				setarray .@enchant[2],.@enchant6[2];
+				setarray .@enchant[3],.@enchant6[3];
+			break;
+			case 8:
+				setarray .@enchant[0],.@enchant7[0];
+				setarray .@enchant[1],.@enchant7[1];
+				setarray .@enchant[2],.@enchant7[2];
+				setarray .@enchant[3],.@enchant7[3];
+			break;
+			case 9:
+				setarray .@enchant[0],.@enchant8[0];
+				setarray .@enchant[1],.@enchant8[1];
+				setarray .@enchant[2],.@enchant8[2];
+				setarray .@enchant[3],.@enchant8[3];
+			break;
+			case 10:
+				setarray .@enchant[0],.@enchant9[0];
+				setarray .@enchant[1],.@enchant9[1];
+				setarray .@enchant[2],.@enchant9[2];
+				setarray .@enchant[3],.@enchant9[3];
+			break;
+			case 11:
+				setarray .@enchant[0],.@enchant10[0];
+				setarray .@enchant[1],.@enchant10[1];
+				setarray .@enchant[2],.@enchant10[2];
+				setarray .@enchant[3],.@enchant10[3];
+			break;
+			case 12:
+				setarray .@enchant[0],.@enchant11[0];
+				setarray .@enchant[1],.@enchant11[1];
+				setarray .@enchant[2],.@enchant11[2];
+				setarray .@enchant[3],.@enchant11[3];
+			break;
+			case 13:
+				setarray .@enchant[0],.@enchant12[0];
+				setarray .@enchant[1],.@enchant12[1];
+				setarray .@enchant[2],.@enchant12[2];
+				setarray .@enchant[3],.@enchant12[3];
+			break;
+			case 14:
+				setarray .@enchant[0],.@enchant13[0];
+				setarray .@enchant[1],.@enchant13[1];
+				setarray .@enchant[2],.@enchant13[2];
+				setarray .@enchant[3],.@enchant13[3];
+			break;
+        } //end switch 
+				//There stone on 4th slot?	
+				if (.@card3 == .@enchant1[0] || .@card3 == .@enchant1[1] || .@card3 == .@enchant1[2] || .@card3 == .@enchant1[3] ||
+					.@card3 == .@enchant2[0] || .@card3 == .@enchant2[1] || .@card3 == .@enchant2[2] || .@card3 == .@enchant2[3] ||
+					.@card3 == .@enchant3[0] || .@card3 == .@enchant3[1] || .@card3 == .@enchant3[2] || .@card3 == .@enchant3[3] ||
+					.@card3 == .@enchant4[0] || .@card3 == .@enchant4[1] || .@card3 == .@enchant4[2] || .@card3 == .@enchant4[3] ||
+					.@card3 == .@enchant5[0] || .@card3 == .@enchant5[1] || .@card3 == .@enchant5[2] || .@card3 == .@enchant5[3] ||
+					.@card3 == .@enchant6[0] || .@card3 == .@enchant6[1] || .@card3 == .@enchant6[2] || .@card3 == .@enchant6[3] ||
+					.@card3 == .@enchant7[0] || .@card3 == .@enchant7[1] || .@card3 == .@enchant7[2] || .@card3 == .@enchant7[3] ||
+					.@card3 == .@enchant8[0] || .@card3 == .@enchant8[1] || .@card3 == .@enchant8[2] || .@card3 == .@enchant8[3] ||
+					.@card3 == .@enchant8[0] || .@card3 == .@enchant8[1] || .@card3 == .@enchant8[2] || .@card3 == .@enchant8[3] ||
+					.@card3 == .@enchant9[0] || .@card3 == .@enchant9[1] || .@card3 == .@enchant9[2] || .@card3 == .@enchant9[3] ||
+					.@card3 == .@enchant10[0] || .@card3 == .@enchant10[1] || .@card3 == .@enchant10[2] || .@card3 == .@enchant10[3] ||
+					.@card3 == .@enchant11[0] || .@card3 == .@enchant11[1] || .@card3 == .@enchant11[2] || .@card3 == .@enchant11[3] ||
+					.@card3 == .@enchant12[0] || .@card3 == .@enchant12[1] || .@card3 == .@enchant12[2] || .@card3 == .@enchant12[3] ||
+					.@card3 == .@enchant13[0] || .@card3 == .@enchant13[1] || .@card3 == .@enchant13[2] || .@card3 == .@enchant13[3]
+				) { // comando @card4
+					mes "[Valquiria Obscura]";
+					mes "Parece que voce ja atinjiu o nivel maximo de encantamento. Volte mais tarde com outra Fallen Wing";
+					close;
+                //There stone on 3st slot?
+				next;
+				} else if (.@card2 == .@enchant1[0] || .@card2 == .@enchant1[1] || .@card2 == .@enchant1[2] || .@card2 == .@enchant1[3] ||
+						   .@card2 == .@enchant2[0] || .@card2 == .@enchant2[1] || .@card2 == .@enchant2[2] || .@card2 == .@enchant2[3] ||
+						   .@card2 == .@enchant3[0] || .@card2 == .@enchant3[1] || .@card2 == .@enchant3[2] || .@card2 == .@enchant3[3] ||
+					       .@card2 == .@enchant4[0] || .@card2 == .@enchant4[1] || .@card2 == .@enchant4[2] || .@card2 == .@enchant4[3] ||
+						   .@card2 == .@enchant5[0] || .@card2 == .@enchant5[1] || .@card2 == .@enchant5[2] || .@card2 == .@enchant5[3] ||
+						   .@card2 == .@enchant6[0] || .@card2 == .@enchant6[1] || .@card2 == .@enchant6[2] || .@card2 == .@enchant6[3] ||
+						   .@card2 == .@enchant7[0] || .@card2 == .@enchant7[1] || .@card2 == .@enchant7[2] || .@card2 == .@enchant7[3] ||
+						   .@card2 == .@enchant8[0] || .@card2 == .@enchant8[1] || .@card2 == .@enchant8[2] || .@card2 == .@enchant8[3] ||
+						   .@card2 == .@enchant8[0] || .@card2 == .@enchant8[1] || .@card2 == .@enchant8[2] || .@card2 == .@enchant8[3] ||
+						   .@card2 == .@enchant9[0] || .@card2 == .@enchant9[1] || .@card2 == .@enchant9[2] || .@card2 == .@enchant9[3] ||
+						   .@card2 == .@enchant10[0] || .@card2 == .@enchant10[1] || .@card2 == .@enchant10[2] || .@card2 == .@enchant10[3] ||
+						   .@card2 == .@enchant11[0] || .@card2 == .@enchant11[1] || .@card2 == .@enchant11[2] || .@card2 == .@enchant11[3] ||
+						   .@card2 == .@enchant12[0] || .@card2 == .@enchant12[1] || .@card2 == .@enchant12[2] || .@card2 == .@enchant12[3] ||
+						   .@card2 == .@enchant13[0] || .@card2 == .@enchant13[1] || .@card2 == .@enchant13[2] || .@card2 == .@enchant13[3]	
+				) { //comando @card3
+					set .@nStones,1;
+				//There stone on 2nd slot?
+				} else if (.@card1 == .@enchant1[0] || .@card1 == .@enchant1[1] || .@card1 == .@enchant1[2] || .@card1 == .@enchant1[3] ||
+						   .@card1 == .@enchant2[0] || .@card1 == .@enchant2[1] || .@card1 == .@enchant2[2] || .@card1 == .@enchant2[3] ||
+						   .@card1 == .@enchant3[0] || .@card1 == .@enchant3[1] || .@card1 == .@enchant3[2] || .@card1 == .@enchant3[3] ||
+					       .@card1 == .@enchant4[0] || .@card1 == .@enchant4[1] || .@card1 == .@enchant4[2] || .@card1 == .@enchant4[3] ||
+						   .@card1 == .@enchant5[0] || .@card1 == .@enchant5[1] || .@card1 == .@enchant5[2] || .@card1 == .@enchant5[3] ||
+						   .@card1 == .@enchant6[0] || .@card1 == .@enchant6[1] || .@card1 == .@enchant6[2] || .@card1 == .@enchant6[3] ||
+						   .@card1 == .@enchant7[0] || .@card1 == .@enchant7[1] || .@card1 == .@enchant7[2] || .@card1 == .@enchant7[3] ||
+						   .@card1 == .@enchant8[0] || .@card1 == .@enchant8[1] || .@card1 == .@enchant8[2] || .@card1 == .@enchant8[3] ||
+						   .@card1 == .@enchant8[0] || .@card1 == .@enchant8[1] || .@card1 == .@enchant8[2] || .@card1 == .@enchant8[3] ||
+						   .@card1 == .@enchant9[0] || .@card1 == .@enchant9[1] || .@card1 == .@enchant9[2] || .@card1 == .@enchant9[3] ||
+						   .@card1 == .@enchant10[0] || .@card1 == .@enchant10[1] || .@card1 == .@enchant10[2] || .@card1 == .@enchant10[3] ||
+						   .@card1 == .@enchant11[0] || .@card1 == .@enchant11[1] || .@card1 == .@enchant11[2] || .@card1 == .@enchant11[3] ||
+						   .@card1 == .@enchant12[0] || .@card1 == .@enchant12[1] || .@card1 == .@enchant12[2] || .@card1 == .@enchant12[3] ||
+						   .@card1 == .@enchant13[0] || .@card1 == .@enchant13[1] || .@card1 == .@enchant13[2] || .@card1 == .@enchant13[3]
+				){ //@card2
+					set .@nStones,2;				
+                } else { //end else if
+					set .@nStones,3; // Do not there stones
+				}//end else
+				//
+			    //
+				set .@equip_refine,getequiprefinerycnt(.@part);				
+				if(.@nStones == 3 ){					
+					.@number = rand(3);						
+					.@enchantstone1 = .@enchant[.@number];
+					//.@enchantstone1 = .@enchant[GEN_Number];
+					set .@enchantstone2,0;
+					set .@enchantstone3,0;						
+				}else if(.@nStones == 2 && .@equip_refine > 6 ){
+					set .@enchantstone1,.@card1;
+					set .@enchantstone2,.@enchant[rand(3)];
+					set .@enchantstone3,0;
+				}else if(.@nStones == 1 && .@equip_refine > 8 ){
+					set .@enchantstone1,.@card1;
+					set .@enchantstone2,.@card2;
+					set .@enchantstone3,.@enchant[rand(4)];		
+				}else{
+					mes "[Valquiria Obscura]";
+					mes "Voce precisa ter um refino nas Fallen Angel maior. +7~8: para dois | +9: tres encantamentos";
+					close;
+				}				
+				//
+				if (select("Sair","Encantar, ha (^630000"+.@nStones+"^000000) slots disponiveis!") == 1) {
+					mes "[Valquiria Obscura]";
+					mes "Ok, volte mais tarde quando estiver preparado.";
+					close;
+				}//end if						
+				//conclusion
+				specialeffect2 EF_REPAIRWEAPON;				
+				delequip .@part;
+				mes "[Valquiria Obscura]";
+				mes "Feito, restam ^630000"+(.@nStones-1)+"^000000 encantamentos.";                
+				getitem2 .@equip_id,1,1,.@equip_refine,0,.@card0,.@enchantstone1,.@enchantstone2,.@enchantstone3; //getitem2 <item id>,<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account ID>};
+				close;
+		break;
+        default:
+                mes "[Valquiria Obscura]";
+                mes "Esse nao e o item certo para esse encantamento.";               
+                close;
+        }
+		//function GEN_Number {
+			//.@randon = rand(0,12);
+			//setarray .@numero[0],0,0,1,1,1,1,2,2,2,2,3,3,3;
+			//.@n = .@numero[.@randon];			
+		//return .@n;
+		//}
+		
+}
+
+
