@@ -71,12 +71,38 @@ simulate_gpu_processing(vertex_data)
 import glfw
 from OpenGL.GL import *
 import numpy as np
+import ctypes
 
-with open('vertex_shader.glsl', 'r') as file:
-    vertex_shader_code = file.read()
+vertex_shader_code = """
+#version 330 core
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec3 color;
 
-with open('fragment_shader.glsl', 'r') as file:
-    fragment_shader_code = file.read()
+out vec3 vertexColor;
+
+void main()
+{
+    gl_Position = vec4(position, 1.0);
+    vertexColor = color;
+}
+"""
+
+fragment_shader_code = """
+#version 330 core
+in vec3 vertexColor;
+out vec4 fragColor;
+
+void main()
+{
+    fragColor = vec4(vertexColor, 1.0);
+}
+"""
+
+vertices = np.array([
+    -0.5, -0.5, 0.0,  1.0, 0.0, 0.0,  # Red
+     0.5, -0.5, 0.0,  0.0, 1.0, 0.0,  # Green
+     0.0,  0.5, 0.0,  0.0, 0.0, 1.0   # Blue
+], dtype=np.float32)
 
 def compile_shader(source, shader_type):
     shader = glCreateShader(shader_type)
@@ -104,12 +130,6 @@ def create_shader_program(vertex_code, fragment_code):
 
     return program
 
-vertices = np.array([
-    # Positions       # Colors
-    -0.5, -0.5, 0.0,  1.0, 0.0, 0.0,  # Red
-     0.5, -0.5, 0.0,  0.0, 1.0, 0.0,  # Green
-     0.0,  0.5, 0.0,  0.0, 0.0, 1.0   # Blue
-], dtype=np.float32)
 
 def main():
     if not glfw.init():
@@ -135,7 +155,7 @@ def main():
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * vertices.itemsize, ctypes.c_void_p(0))
     glEnableVertexAttribArray(0)
 
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * vertices.itemsize, ctypes.c_void_p(12))
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * vertices.itemsize, ctypes.c_void_p(3 * vertices.itemsize))
     glEnableVertexAttribArray(1)
 
     glBindBuffer(GL_ARRAY_BUFFER, 0)
